@@ -1,11 +1,12 @@
-
 import './App.css';
 import VideoPlayer from './VideoPlayer';
 
 function App() {
   return (
     <div className="App">
-      <VideoPlayer/>
+        <div className="container">
+          <VideoPlayer/>
+        </div>
     </div>
   );
 }

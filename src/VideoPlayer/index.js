@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect} from 'react'
+import React, {useState, useRef, useEffect, useCallback} from 'react'
+
 import { 
     CaptionIcon, CastIcon, EpisodeIcon,
     FastFowardIcon, FullVolumeIcon, HelpIcon, 
@@ -10,12 +11,13 @@ import "./index.css"
 
 const VideoPlayer = () => {
 
+    //Varibales
     const videoContainer = useRef(null)
     const video = useRef(null)
     const watchedBar = useRef(null)
     const progressBar = useRef(null)
     const controlsContainer = useRef(null)
-    const [VideoDuration, setVideoDuration] = useState('--:--')
+    const [videoDuration, setVideoDuration] = useState('--:--')
     const [realTime, setRealTime] = useState('00:00')
     const [videoPlaying, setVideoPlaying] = useState('http://distribution.bbb3d.renderfarming.net/video/mp4/bbb_sunflower_1080p_30fps_normal.mp4')
     const [playlist, setPlaylist] = useState(null)
@@ -25,9 +27,44 @@ const VideoPlayer = () => {
     const [pipMode, setPipMode] = useState(false)
     let controlsTimeout;
 
+
+    const toggleMute = useCallback(() => {
+        video.current.muted = !video.current.muted;
+        setMuted(muted => !muted)
+    }, [video]);
+
+
+    const CountTime = useCallback(() =>  {
+
+        watchedBar.current.style.width = ((video.current.currentTime / video.current.duration) * 100) + '%';
+        const totalDuration = video.current.duration
+    
+        const timeDuration = new Date(null)
+        timeDuration.setSeconds(totalDuration)
+        let VideoHours = null
+        if(totalDuration >= 3600){
+            VideoHours = (timeDuration.getHours().toString()).padStart('2', '0')
+        }
+        let Videominutes = (timeDuration.getMinutes().toString()).padStart('2', '0');
+        let Videoseconds = (timeDuration.getSeconds().toString()).padStart('2', '0');
+        
+        setVideoDuration(`${VideoHours ? ':' +VideoHours : ''}${Videominutes}:${Videoseconds}`)
+       
+        
+        const time = new Date(null);
+        time.setSeconds(video.current.currentTime);
+        let hours = null;
+        if(video.current.currentTime >= 3600) {
+            hours = (time.getHours().toString()).padStart('2', '0');
+        }                
+        let minutes = (time.getMinutes().toString()).padStart('2', '0');
+        let seconds = (time.getSeconds().toString()).padStart('2', '0');
+        setRealTime(`${hours ? ':'+hours : ''}${minutes}:${seconds}`);
+    }, [video, watchedBar])
+
     useEffect(() => {
         if(video){
-           1
+    
             watchedBar.current.style.width = '0px';
             
             let updateTime = video.current.addEventListener('timeupdate', CountTime);
@@ -51,7 +88,7 @@ const VideoPlayer = () => {
             });
         }
 
-    }, [video])
+    }, [CountTime, toggleMute, video])
 
     useEffect(() => {
         if(watchedBar){
@@ -62,32 +99,7 @@ const VideoPlayer = () => {
       
     }, [watchedBar])
 
-    const CountTime = () =>  {
-        watchedBar.current.style.width = ((video.current.currentTime / video.current.duration) * 100) + '%';
-        const videoDuration = video.current.duration
-    
-        const timeDuration = new Date(null)
-        timeDuration.setSeconds(videoDuration)
-        let VideoHours = null
-        if(videoDuration >= 3600){
-            VideoHours = (timeDuration.getHours().toString()).padStart('2', '0')
-        }
-        let Videominutes = (timeDuration.getMinutes().toString()).padStart('2', '0');
-        let Videoseconds = (timeDuration.getSeconds().toString()).padStart('2', '0');
-        
-        setVideoDuration(`${VideoHours ? ':' +VideoHours : ''}${Videominutes}:${Videoseconds}`)
-       
-        
-        const time = new Date(null);
-        time.setSeconds(video.current.currentTime);
-        let hours = null;
-        if(video.current.currentTime >= 3600) {
-            hours = (time.getHours().toString()).padStart('2', '0');
-        }                
-        let minutes = (time.getMinutes().toString()).padStart('2', '0');
-        let seconds = (time.getSeconds().toString()).padStart('2', '0');
-        setRealTime(`${hours ? ':'+hours : ''}${minutes}:${seconds}`);
-    }
+   
     
     const displayControls = () => {
         controlsContainer.current.style.opacity = '1';
@@ -127,10 +139,6 @@ const VideoPlayer = () => {
         }
     }
 
-    const toggleMute = () => {
-        video.current.muted = !video.current.muted;
-        setMuted(!muted)
-    };
     
     const toggleFullScreen = () => {
         if (!document.fullscreenElement) {
@@ -164,30 +172,29 @@ const VideoPlayer = () => {
                             <div className="watched-bar" ref={watchedBar}></div>
                             {/* <div className="playhead"></div> */}
                         </div>
-                        {/* <div className="time-remaining" >
-                            00:00
-                        </div> */}
+                   
                     </div>
                     <div className="controls">
 
                         <div className="controls-right">
-                             <button className="rewind">        
+                             <button className="rewind control-button">        
                                 <RewindIcon onClick={() => video.current.currentTime -= 10}/>
                             </button>
-                            <button className="play-pause">
+                            <button className="play-pause control-button">
                                 {
                                     playing ? 
                                     <PausedIcon onClick={TogglePlay}/> :  
                                     <PlayIcon onClick={TogglePlay}/>
                                 }
                             </button>
-                            <button className="fast-forward">           
+                            <button className="fast-forward control-button">           
                                 <FastFowardIcon onClick={() => video.current.currentTime += 10}/>
                             </button>
-                            <p className="duration">
-                                <span className="time-duration">{realTime}/</span><span className="time-duration">{VideoDuration}</span>
-                            </p>
-                            <button className="volume">   
+                            <button className="duration control-button">
+                                {realTime}/{videoDuration}
+                                {/* <span className="time-duration">{realTime}/</span><span className="time-duration">{videoDuration}</span> */}
+                            </button>
+                            <button className="volume control-button">   
                                 {
                                     muted ? 
                                     <VolumeMutedIcon onClick={toggleMute}/>  : 
@@ -198,16 +205,16 @@ const VideoPlayer = () => {
                         
                 
                         <div className="controls-left">
-                            <button className="episodes">            
+                            <button className="episodes control-button">            
                                 <EpisodeIcon/>
                             </button>
-                            <button className="captions">            
+                            <button className="captions control-button">            
                                 <CaptionIcon/>
                             </button>
-                            <button className="cast">        
+                            <button className="cast control-button">        
                             <CastIcon/>
                             </button>
-                            <button className="full-screen">
+                            <button className="full-screen control-button">
                                 {
                                     fullscreen ? 
                                     <MinimizeIcon onClick={toggleFullScreen} /> :  

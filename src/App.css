@@ -1,4 +1,14 @@
 .App{
+  margin: 0;
+  padding: 20px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: black;
+  font-family: 'Rubik', sans-serif;
+}
+
+.container{
   width: 100%;
   padding-right: 15px;
   padding-left: 15px;
@@ -7,24 +17,25 @@
 }
 
 @media (min-width: 576px){
-  .App {
+  .container {
       max-width: 540px;
   }
 }
 
 @media (min-width: 576px){
-  .App {
+  .container {
       max-width: 540px;
   }
 }
 @media (min-width: 992px){
-    .App {
+    .container {
       max-width: 960px;
   }
 }
 
 @media (min-width: 768px){
-    .App {
+    .container {
       max-width: 720px;
   }
 }
+
